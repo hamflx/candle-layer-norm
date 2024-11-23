@@ -51,7 +51,7 @@ fn main() -> Result<()> {
 
     let compute_cap = compute_cap()?;
 
-    let out_file = build_dir.join("liblayernorm.a");
+    let out_file = build_dir.join("layernorm.lib");
 
     let kernel_dir = PathBuf::from("kernels");
     let cu_files: Vec<_> = KERNEL_FILES
@@ -100,6 +100,8 @@ fn main() -> Result<()> {
                     .arg("--expt-relaxed-constexpr")
                     .arg("--expt-extended-lambda")
                     .arg("--use_fast_math")
+                    .arg("-Xcompiler")
+                    .arg("/bigobj")
                     .arg("--verbose");
                 if let Ok(ccbin_path) = &ccbin_env {
                     command
@@ -127,6 +129,8 @@ fn main() -> Result<()> {
         command
             .arg("--lib")
             .args(["-o", out_file.to_str().unwrap()])
+            .arg("-Xcompiler")
+            .arg("/bigobj")
             .args(obj_files);
         let output = command
             .spawn()
@@ -144,7 +148,6 @@ fn main() -> Result<()> {
     println!("cargo:rustc-link-search={}", build_dir.display());
     println!("cargo:rustc-link-lib=layernorm");
     println!("cargo:rustc-link-lib=dylib=cudart");
-    println!("cargo:rustc-link-lib=dylib=stdc++");
 
     Ok(())
 }
